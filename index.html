@@ -3,87 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Fund Tracker</title>
+    <title>Collector Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #6366f1; --secondary: #a855f7; --accent: #22d3ee; --bg: #0f172a; --card-bg: rgba(30, 41, 59, 0.7); --text: #f8fafc; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at top left, #1e1b4b, #0f172a); color: var(--text); margin: 0; display: flex; min-height: 100vh; }
         
-        /* Sidebar Styles */
         .sidebar { width: 280px; background: rgba(15, 23, 42, 0.9); border-right: 1px solid rgba(255,255,255,0.1); padding: 30px 15px; display: flex; flex-direction: column; gap: 20px; }
-        .profile-box { background: var(--card-bg); padding: 15px; border-radius: 18px; border: 1px solid var(--accent); }
+        .profile-box { background: var(--card-bg); padding: 15px; border-radius: 18px; border: 1px solid var(--accent); margin-bottom: 20px; }
         .active-users-list { flex: 1; overflow-y: auto; }
-        .user-pill { display: flex; align-items: center; gap: 10px; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 10px; margin-bottom: 8px; font-size: 13px; }
+        .user-pill { display: flex; align-items: center; gap: 10px; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 10px; margin-bottom: 8px; font-size: 13px; }
         .status-dot { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; box-shadow: 0 0 8px #22c55e; }
         
-        /* Main Content */
         .main-content { flex: 1; padding: 40px; display: flex; justify-content: center; }
-        .container { width: 100%; max-width: 800px; }
-        .glass-card { background: var(--card-bg); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); padding: 25px; border-radius: 24px; margin-bottom: 25px; }
+        .container { width: 100%; max-width: 850px; }
+        .glass-card { background: var(--card-bg); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); padding: 30px; border-radius: 24px; margin-bottom: 25px; }
         
-        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px; }
-        .stat-box { background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 20px; text-align: center; }
-        .stat-box h2 { margin: 5px 0; color: var(--accent); }
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-bottom: 25px; }
+        .stat-box { background: rgba(255, 255, 255, 0.05); padding: 25px; border-radius: 20px; text-align: center; }
+        .stat-box h2 { margin: 10px 0; color: var(--accent); font-size: 32px; }
 
-        .branch-badge { background: rgba(99, 102, 241, 0.2); color: #c7d2fe; padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; }
-        table { width: 100%; border-collapse: collapse; }
-        td, th { padding: 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        /* --- TABLE SPACING FIXES --- */
+        .table-container { overflow-x: auto; margin-top: 10px; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0 8px; } /* Adds space between rows */
+        th { text-align: left; padding: 15px 20px; color: #94a3b8; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+        td { padding: 18px 20px; background: rgba(255, 255, 255, 0.02); vertical-align: middle; }
+        td:first-child { border-radius: 12px 0 0 12px; }
+        td:last-child { border-radius: 0 12px 12px 0; text-align: right; }
+
+        .branch-badge { background: rgba(99, 102, 241, 0.2); color: #c7d2fe; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; display: inline-block; }
+        .collector-tag { font-size: 10px; color: #64748b; display: block; margin-top: 4px; font-weight: 400; }
+
+        input, select { background: #0f172a; color: white; border: 1px solid rgba(255,255,255,0.1); padding: 14px; border-radius: 12px; outline: none; width: 100%; box-sizing: border-box; }
         
-        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: 700; cursor: pointer; width: 100%; }
-        .delete-btn { color: #f87171; cursor: pointer; background: none; border: none; font-size: 18px; }
+        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border: none; padding: 16px; border-radius: 12px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.3s; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3); }
+        .delete-btn { color: #f87171; cursor: pointer; background: none; border: none; font-size: 20px; opacity: 0.6; transition: 0.3s; }
+        .delete-btn:hover { opacity: 1; }
 
-        @media (max-width: 768px) { body { flex-direction: column; } .sidebar { width: auto; height: 300px; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1); } }
+        @media (max-width: 768px) { body { flex-direction: column; } .sidebar { width: auto; border-right: none; } .main-content { padding: 20px; } }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
     <div class="profile-box">
-        <p style="font-size: 10px; color: #94a3b8; margin: 0;">YOU ARE LOGGED IN</p>
-        <h3 id="displayUserName" style="margin: 5px 0;">Guest</h3>
+        <p style="font-size: 10px; color: #94a3b8; margin: 0; font-weight: 700;">COLLECTOR PROFILE</p>
+        <h3 id="displayUserName" style="margin: 8px 0;">Guest</h3>
         <span class="branch-badge" id="displayUserBranch">N/A</span>
     </div>
 
     <div class="active-users-list">
-        <p style="font-size: 11px; font-weight: 700; color: #94a3b8; margin-bottom: 15px;">ONLINE NOW</p>
-        <div id="onlineList">
-            </div>
+        <p style="font-size: 11px; font-weight: 800; color: #64748b; margin-bottom: 15px; letter-spacing: 0.5px;">ONLINE COLLECTORS</p>
+        <div id="onlineList"></div>
     </div>
 
-    <button onclick="logout()" style="background:none; border:1px solid #f87171; color:#f87171; padding:10px; border-radius:10px; cursor:pointer;">Logout</button>
+    <button onclick="logout()" style="background:rgba(248, 113, 113, 0.1); border:1px solid #f87171; color:#f87171; padding:12px; border-radius:12px; cursor:pointer; font-weight:600;">Logout</button>
 </div>
 
 <div class="main-content">
     <div class="container">
-        <header style="margin-bottom: 30px; border-left: 4px solid var(--accent); padding-left: 15px;">
-            <h1 style="margin: 0; font-size: 26px;">🎓 Event Fund Dashboard</h1>
-            <p style="color: #94a3b8; margin: 5px 0;">Global Sync Enabled</p>
+        <header style="margin-bottom: 40px; border-left: 5px solid var(--accent); padding-left: 20px;">
+            <h1 style="margin: 0; font-size: 30px; letter-spacing: -1px;">🎓 Event Fund Dashboard</h1>
+            <p style="color: #94a3b8; margin: 8px 0; font-size: 14px;">Recording contributions in real-time</p>
         </header>
 
         <div class="stat-grid">
-            <div class="stat-box"><span>Collected</span><h2 id="totalDisplay">₹0</h2></div>
-            <div class="stat-box"><span>Goal</span><h2 id="goalPercent">0%</h2></div>
+            <div class="stat-box"><span>Total Collected</span><h2 id="totalDisplay">₹0</h2></div>
+            <div class="stat-box"><span>Goal Progress</span><h2 id="goalPercent">0%</h2></div>
         </div>
 
         <div class="glass-card">
-            <div style="display: flex; flex-direction: column; gap: 15px;">
-                <input type="text" id="name" readonly style="background: rgba(15,23,42,0.4); color: #94a3b8; border: 1px solid rgba(255,255,255,0.05); padding: 12px; border-radius: 10px;">
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" id="branch" readonly style="flex:1; background: rgba(15,23,42,0.4); color: #94a3b8; border: 1px solid rgba(255,255,255,0.05); padding: 12px; border-radius: 10px;">
-                    <select id="amount" style="flex:1; background: #0f172a; color: white; border: 1px solid rgba(255,255,255,0.1); padding: 12px; border-radius: 10px;">
-                        <option value="50">₹50</option><option value="100" selected>₹100</option><option value="500">₹500</option>
+            <h3 style="margin-top:0; font-size: 15px; color: var(--accent); margin-bottom: 20px;">Add Student Contribution</h3>
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <input type="text" id="kidName" placeholder="Student's Full Name">
+                <div style="display: flex; gap: 15px;">
+                    <select id="kidBranch" style="flex:1;">
+                        <option value="CSE">CSE</option>
+                        <option value="CIVIL">CIVIL</option>
+                        <option value="MECH">MECH</option>
+                        <option value="ELE">ELE</option>
+                    </select>
+                    <select id="amount" style="flex:1;">
+                        <option value="50">₹50</option>
+                        <option value="100" selected>₹100</option>
+                        <option value="500">₹500</option>
                     </select>
                 </div>
-                <button class="btn-primary" onclick="addContribution()">Confirm Contribution</button>
+                <button class="btn-primary" onclick="addContribution()">Confirm & Add Entry</button>
             </div>
         </div>
 
         <div class="glass-card">
-            <h3 style="margin-top: 0; font-size: 16px;">Recent History</h3>
-            <div style="overflow-x: auto;">
+            <h3 style="margin-top: 0; font-size: 18px; margin-bottom: 20px;">Recent History</h3>
+            <div class="table-container">
                 <table>
-                    <thead><tr><th>User</th><th>Branch</th><th>Time</th><th>Amt</th><th></th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th style="width: 40%;">Student</th>
+                            <th style="width: 20%;">Branch</th>
+                            <th style="width: 20%;">Time</th>
+                            <th style="width: 15%;">Amount</th>
+                            <th style="width: 5%;"></th>
+                        </tr>
+                    </thead>
                     <tbody id="tableBody"></tbody>
                 </table>
             </div>
@@ -95,7 +119,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
-    // 1. DATA AND LOGIN CHECK
     const sessionName = sessionStorage.getItem('userName');
     const sessionBranch = sessionStorage.getItem('userBranch');
     const loginTime = sessionStorage.getItem('loginTime');
@@ -104,10 +127,7 @@
 
     document.getElementById('displayUserName').innerText = sessionName;
     document.getElementById('displayUserBranch').innerText = sessionBranch;
-    document.getElementById('name').value = sessionName;
-    document.getElementById('branch').value = sessionBranch;
 
-    // 2. FIREBASE INIT
     const firebaseConfig = {
         apiKey: "AIzaSyA8VcxAPzzHbc6F8iEwiEXUXY-0-2sPQ64",
         authDomain: "collegetracker-39758.firebaseapp.com",
@@ -120,9 +140,8 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     
-    // 3. PRESENCE TRACKING (Active Users)
+    // PRESENCE
     const myUserRef = db.ref('onlineUsers').push();
-    // Remove user from list when they close tab or disconnect
     myUserRef.onDisconnect().remove();
     myUserRef.set({ name: sessionName, branch: sessionBranch, time: loginTime });
 
@@ -144,7 +163,7 @@
         }
     });
 
-    // 4. FUND TRACKING LOGIC
+    // CONTRIBUTIONS
     const contributionsRef = db.ref('contributions');
     contributionsRef.on('value', (snapshot) => {
         const data = snapshot.val();
@@ -158,10 +177,13 @@
                 total += parseInt(item.amt);
                 tableBody.innerHTML += `
                     <tr>
-                        <td><b>${item.name}</b></td>
+                        <td>
+                            <div style="font-weight:700; color: white;">${item.name}</div>
+                            <span class="collector-tag">Collected by ${item.collector}</span>
+                        </td>
                         <td><span class="branch-badge">${item.branch}</span></td>
-                        <td style="font-size:11px; color:#94a3b8">${item.date}</td>
-                        <td style="color:var(--accent)">₹${item.amt}</td>
+                        <td style="font-size:12px; color:#94a3b8; font-weight: 500;">${item.date}</td>
+                        <td><div style="color:var(--accent); font-weight:800; font-size: 16px;">₹${item.amt}</div></td>
                         <td><button class="delete-btn" onclick="deleteEntry('${item.id}')">&times;</button></td>
                     </tr>`;
             });
@@ -171,21 +193,25 @@
     });
 
     function addContribution() {
+        const kidName = document.getElementById('kidName').value;
+        const kidBranch = document.getElementById('kidBranch').value;
+        if(!kidName) return alert("Please enter the student's name!");
+
         contributionsRef.push({
-            name: sessionName,
-            branch: sessionBranch,
+            name: kidName,
+            branch: kidBranch,
+            collector: sessionName,
             amt: document.getElementById('amount').value,
             date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         });
+
+        document.getElementById('kidName').value = '';
     }
 
     function deleteEntry(id) {
-        const pw = prompt("Enter Admin Password to delete:");
-        if(pw === "1234") { // <--- CHANGE YOUR PASSWORD HERE
-            db.ref('contributions/' + id).remove();
-        } else {
-            alert("Wrong password!");
-        }
+        const pw = prompt("Enter Admin Password:");
+        if(pw === "1234") { db.ref('contributions/' + id).remove(); }
+        else { alert("Wrong password!"); }
     }
 
     function logout() {
